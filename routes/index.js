@@ -1,28 +1,12 @@
-const router = require('koa-router')()
+import Router from 'koa-router'
+import DemoRoute from './demo.js'
+import MonitorRoute from './monitor.js'
+import UserRoute from './user.js'
 
-router.get('/', async (ctx, next) => {
-  console.log('ctx', ctx.req)
-  ctx.yty = 'ytytytytytytytyty'
-  await ctx.render('index', {
-    title: 'Hello Koa 2!'
-  })
-})
+const router = new Router()
 
-router.post('/string', async (ctx, next) => {
-  console.log('ctx', ctx)
-  ctx.body = {
-    code: 200,
-    success: true,
-    data: {
-      resres: '1233321'
-    }
-  }
-})
+router.use('/demo', DemoRoute.routes())
+router.use('/monitor', MonitorRoute.routes())
+router.use('/user', UserRoute.routes())
 
-router.get('/json', async (ctx, next) => {
-  ctx.body = {
-    title: 'koa2 json'
-  }
-})
-
-module.exports = router
+export default router

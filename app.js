@@ -1,15 +1,20 @@
-const Koa = require('koa')
-const app = new Koa()
-const views = require('koa-views')
-const json = require('koa-json')
-const onerror = require('koa-onerror')
-const { koaBody } = require('koa-body')
-const logger = require('koa-logger')
+import Koa from 'koa'
+import views from 'koa-views'
+import json from 'koa-json'
+import onerror from 'koa-onerror'
+import { koaBody } from 'koa-body'
+import logger from 'koa-logger'
+import serve from 'koa-static'
+import router from './routes/index.js'
+// import users from'./routes/users'
+// import monitor from'./routes/monitor'
 
-const index = require('./routes/index')
-const users = require('./routes/users')
-const monitor = require('./routes/monitor')
-const database = require('./middlewares/database')
+// 引入middlewares
+import database from './middlewares/database.js'
+
+import './utils/globalExtend.js'
+
+const app = new Koa()
 
 // 初始化数据库
 database.init()
@@ -17,7 +22,7 @@ database.init()
 // error handler
 onerror(app)
 
-// middlewares
+// 全局使用middlewares
 app.use(
   koaBody({
     multipart: true
@@ -25,10 +30,10 @@ app.use(
 )
 app.use(json())
 app.use(logger())
-app.use(require('koa-static')(__dirname + '/public'))
+app.use(serve(global.getDirName(import.meta.url) + '/public'))
 
 app.use(
-  views(__dirname + '/views', {
+  views(global.getDirName(import.meta.url) + '/views', {
     extension: 'pug'
   })
 )
@@ -45,13 +50,13 @@ app.use(async (ctx, next) => {
 })
 
 // routes
-app.use(index.routes(), index.allowedMethods())
-app.use(users.routes(), users.allowedMethods())
-app.use(monitor.routes(), monitor.allowedMethods())
+app.use(router.routes()).use(router.allowedMethods())
+// app.use(users.routes(), users.allowedMethods())
+// app.use(monitor.routes(), monitor.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
 })
 
-module.exports = app
+export default app
